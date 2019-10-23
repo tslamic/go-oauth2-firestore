@@ -1,0 +1,9 @@
+.PHONY: fmt
+fmt:
+	go mod tidy
+	go fmt ./...
+
+.PHONY: vet
+vet:
+	go vet ./...
+	go test -race ./...
