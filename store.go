@@ -1,4 +1,4 @@
-package main
+package fstorage
 
 import (
 	"cloud.google.com/go/firestore"
