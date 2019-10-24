@@ -3,7 +3,7 @@
 ## Get it
 
 ```bash
-go get github.com/tslamic/go-oauth2-firestore
+go get -u github.com/tslamic/go-oauth2-firestore
 ```
 
 ## Use it
@@ -15,7 +15,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	firebase "firebase.google.com/go"
-	storage "github.com/tslamic/go-oauth2-firestore"
+	"github.com/tslamic/go-oauth2-firestore"
 	"gopkg.in/oauth2.v3/manage"
 	"log"
 	"os"
@@ -27,7 +27,7 @@ func main() {
 	defer client.Close()
 
 	manager := manage.NewDefaultManager()
-	manager.MapTokenStorage(storage.New(client, "tokens"))
+	manager.MapTokenStorage(fstorage.New(client, "tokens"))
 }
 
 func client(ctx context.Context) *firestore.Client {
@@ -42,7 +42,6 @@ func client(ctx context.Context) *firestore.Client {
 	}
 	return client
 }
-
 ```
 ## License
 
