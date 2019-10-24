@@ -1,5 +1,49 @@
 # Firestore Storage for OAuth 2.0 Server
 
+## Get it
+
+```bash
+go get github.com/tslamic/go-oauth2-firestore
+```
+
+## Use it
+
+```go
+package main
+
+import (
+	"cloud.google.com/go/firestore"
+	"context"
+	firebase "firebase.google.com/go"
+	storage "github.com/tslamic/go-oauth2-firestore"
+	"gopkg.in/oauth2.v3/manage"
+	"log"
+	"os"
+)
+
+func main() {
+	ctx := context.Background()
+	client := client(ctx)
+	defer client.Close()
+
+	manager := manage.NewDefaultManager()
+	manager.MapTokenStorage(storage.New(client, "tokens"))
+}
+
+func client(ctx context.Context) *firestore.Client {
+	conf := &firebase.Config{ProjectID: os.Getenv("PROJECT_ID")}
+	app, err := firebase.NewApp(ctx, conf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return client
+}
+
+```
 ## License
 
     Copyright (c) 2019 Tadej Slamic
