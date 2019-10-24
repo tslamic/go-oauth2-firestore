@@ -1,12 +1,12 @@
 # Firestore Storage for OAuth 2.0 Server
 
-## Get
+## Get it
 
 ```bash
 go get github.com/tslamic/go-oauth2-firestore
 ```
 
-## Usage
+## Use it
 
 ```go
 package main
