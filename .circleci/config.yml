@@ -5,7 +5,7 @@ jobs:
       - image: circleci/golang:1.13.1
     working_directory: ~/auth
     steps:
-      - echo $GAC > gac.json && export GOOGLE_APPLICATION_CREDENTIALS=~/auth/gac.json
+      - run: echo $GAC > gac.json && export GOOGLE_APPLICATION_CREDENTIALS=~/auth/gac.json
       - checkout
       - run: go get -d -v
       - run: make vet
