@@ -6,6 +6,6 @@ jobs:
     working_directory: ~/auth
     steps:
       - checkout
-      - run: echo $GAC > gac.json && export GOOGLE_APPLICATION_CREDENTIALS=~/auth/gac.json
+      - run: echo $GAC > gac.json && echo "export GOOGLE_APPLICATION_CREDENTIALS=~/auth/gac.json" >> $BASH_ENV
       - run: go get -d -v
       - run: make vet
