@@ -37,7 +37,10 @@ func TestMain(m *testing.M) {
 }
 
 func TestStoreClient(t *testing.T) {
-	client := New(c, "tests")
+	client, c := New(c, "tests")
+	defer func() {
+		assert.Nil(t, c.Close())
+	}()
 	type holder struct {
 		key string
 		get func(string) (oauth2.TokenInfo, error)
