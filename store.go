@@ -23,12 +23,12 @@ func New(c *firestore.Client, collection string) oauth2.TokenStore {
 // NewWithTimeout returns a new Firestore token store.
 // Any Firestore operation will be cancelled if it surpasses the provided timeout.
 func NewWithTimeout(c *firestore.Client, collection string, timeout time.Duration) oauth2.TokenStore {
-	fs := &fstore{c: c, n: collection, t: timeout}
+	fs := &store{c: c, n: collection, t: timeout}
 	return &client{c: fs}
 }
 
 type client struct {
-	c *fstore
+	c *store
 }
 
 func (f *client) Create(info oauth2.TokenInfo) error {

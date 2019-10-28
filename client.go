@@ -7,23 +7,23 @@ import (
 	"time"
 )
 
-type fstore struct {
+type store struct {
 	c *firestore.Client
-	n string
+	n string // Top-level collection name.
 	t time.Duration
 }
 
-func (f *fstore) Put(token *models.Token) error {
-	ctx, cancel := context.WithTimeout(context.Background(), f.t)
+func (s *store) Put(token *models.Token) error {
+	ctx, cancel := context.WithTimeout(context.Background(), s.t)
 	defer cancel()
-	_, _, err := f.c.Collection(f.n).Add(ctx, token)
+	_, _, err := s.c.Collection(s.n).Add(ctx, token)
 	return err
 }
 
-func (f *fstore) Get(key string, val interface{}) (*models.Token, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), f.t)
+func (s *store) Get(key string, val interface{}) (*models.Token, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), s.t)
 	defer cancel()
-	iter := f.c.Collection(f.n).Where(key, "==", val).Limit(1).Documents(ctx)
+	iter := s.c.Collection(s.n).Where(key, "==", val).Limit(1).Documents(ctx)
 	doc, err := iter.Next()
 	if err != nil {
 		return nil, err
@@ -33,11 +33,11 @@ func (f *fstore) Get(key string, val interface{}) (*models.Token, error) {
 	return info, err
 }
 
-func (f *fstore) Del(key string, val interface{}) error {
-	ctx, cancel := context.WithTimeout(context.Background(), f.t)
+func (s *store) Del(key string, val interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), s.t)
 	defer cancel()
-	return f.c.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		query := f.c.Collection(f.n).Where(key, "==", val).Limit(1)
+	return s.c.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		query := s.c.Collection(s.n).Where(key, "==", val).Limit(1)
 		iter := tx.Documents(query)
 		doc, err := iter.Next()
 		if err != nil {
@@ -47,6 +47,6 @@ func (f *fstore) Del(key string, val interface{}) error {
 	})
 }
 
-func (f *fstore) Close() error {
-	return f.c.Close()
+func (s *store) Close() error {
+	return s.c.Close()
 }
