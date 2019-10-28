@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
+	"io"
 	"time"
 )
 
@@ -16,15 +17,15 @@ const (
 )
 
 // New returns a new Firestore token store.
-func New(c *firestore.Client, collection string) oauth2.TokenStore {
+func New(c *firestore.Client, collection string) (oauth2.TokenStore, io.Closer) {
 	return NewWithTimeout(c, collection, timeout)
 }
 
 // NewWithTimeout returns a new Firestore token store.
 // Any Firestore operation will be cancelled if it surpasses the provided timeout.
-func NewWithTimeout(c *firestore.Client, collection string, timeout time.Duration) oauth2.TokenStore {
+func NewWithTimeout(c *firestore.Client, collection string, timeout time.Duration) (oauth2.TokenStore, io.Closer) {
 	fs := &store{c: c, n: collection, t: timeout}
-	return &client{c: fs}
+	return &client{c: fs}, fs
 }
 
 type client struct {
