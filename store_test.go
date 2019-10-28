@@ -17,8 +17,7 @@ var c *firestore.Client
 func TestMain(m *testing.M) {
 	project, ok := os.LookupEnv("PROJECT_ID")
 	if !ok {
-		log.Println("skipping tests as PROJECT_ID env variable is missing")
-		return
+		log.Fatalln("PROJECT_ID env variable is missing")
 	}
 	ctx := context.Background()
 	conf := &firebase.Config{ProjectID: project}
