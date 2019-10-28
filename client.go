@@ -46,7 +46,3 @@ func (s *store) Del(key string, val interface{}) error {
 		return tx.Delete(doc.Ref)
 	})
 }
-
-func (s *store) Close() error {
-	return s.c.Close()
-}
