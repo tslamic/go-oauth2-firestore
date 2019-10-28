@@ -15,44 +15,47 @@ const (
 	timeout = 30 * time.Second
 )
 
-func New(c *firestore.Client, collection string) *Client {
+// New returns a new Firestore token store.
+func New(c *firestore.Client, collection string) oauth2.TokenStore {
 	return NewWithTimeout(c, collection, timeout)
 }
 
-func NewWithTimeout(c *firestore.Client, collection string, timeout time.Duration) *Client {
+// NewWithTimeout returns a new Firestore token store.
+// Any Firestore operation will be cancelled if it surpasses the provided timeout.
+func NewWithTimeout(c *firestore.Client, collection string, timeout time.Duration) oauth2.TokenStore {
 	fs := &fstore{c: c, n: collection, t: timeout}
-	return &Client{c: fs}
+	return &client{c: fs}
 }
 
-type Client struct {
+type client struct {
 	c *fstore
 }
 
-func (f *Client) Create(info oauth2.TokenInfo) error {
+func (f *client) Create(info oauth2.TokenInfo) error {
 	return f.c.Put(token(info))
 }
 
-func (f *Client) RemoveByCode(code string) error {
+func (f *client) RemoveByCode(code string) error {
 	return f.c.Del(keyCode, code)
 }
 
-func (f *Client) RemoveByAccess(access string) error {
+func (f *client) RemoveByAccess(access string) error {
 	return f.c.Del(keyAccess, access)
 }
 
-func (f *Client) RemoveByRefresh(refresh string) error {
+func (f *client) RemoveByRefresh(refresh string) error {
 	return f.c.Del(keyRefresh, refresh)
 }
 
-func (f *Client) GetByCode(code string) (oauth2.TokenInfo, error) {
+func (f *client) GetByCode(code string) (oauth2.TokenInfo, error) {
 	return f.c.Get(keyCode, code)
 }
 
-func (f *Client) GetByAccess(access string) (oauth2.TokenInfo, error) {
+func (f *client) GetByAccess(access string) (oauth2.TokenInfo, error) {
 	return f.c.Get(keyAccess, access)
 }
 
-func (f *Client) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
+func (f *client) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
 	return f.c.Get(keyRefresh, refresh)
 }
 
