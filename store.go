@@ -2,8 +2,8 @@ package fstorage
 
 import (
 	"cloud.google.com/go/firestore"
-	"github.com/tslamic/go-oauth2-firestore/token"
 	"gopkg.in/oauth2.v3"
+	"gopkg.in/oauth2.v3/models"
 	"time"
 )
 
@@ -29,7 +29,7 @@ type Client struct {
 }
 
 func (f *Client) Create(info oauth2.TokenInfo) error {
-	return f.c.Put(token.From(info))
+	return f.c.Put(token(info))
 }
 
 func (f *Client) RemoveByCode(code string) error {
@@ -54,4 +54,22 @@ func (f *Client) GetByAccess(access string) (oauth2.TokenInfo, error) {
 
 func (f *Client) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
 	return f.c.Get(keyRefresh, refresh)
+}
+
+func token(info oauth2.TokenInfo) *models.Token {
+	return &models.Token{
+		ClientID:         info.GetClientID(),
+		UserID:           info.GetUserID(),
+		RedirectURI:      info.GetRedirectURI(),
+		Scope:            info.GetScope(),
+		Code:             info.GetCode(),
+		CodeCreateAt:     info.GetCodeCreateAt(),
+		CodeExpiresIn:    info.GetCodeExpiresIn(),
+		Access:           info.GetAccess(),
+		AccessCreateAt:   info.GetAccessCreateAt(),
+		AccessExpiresIn:  info.GetAccessExpiresIn(),
+		Refresh:          info.GetRefresh(),
+		RefreshCreateAt:  info.GetRefreshCreateAt(),
+		RefreshExpiresIn: info.GetRefreshExpiresIn(),
+	}
 }

@@ -5,8 +5,8 @@ import (
 	"context"
 	firebase "firebase.google.com/go"
 	"github.com/stretchr/testify/assert"
-	"github.com/tslamic/go-oauth2-firestore/token"
 	"gopkg.in/oauth2.v3"
+	"gopkg.in/oauth2.v3/models"
 	"log"
 	"os"
 	"testing"
@@ -43,7 +43,7 @@ func TestStoreClient(t *testing.T) {
 		get func(string) (oauth2.TokenInfo, error)
 		del func(string) error
 	}
-	tokens := map[*token.Info]holder{
+	tokens := map[*models.Token]holder{
 		{Access: "access"}:   {key: "access", get: client.GetByAccess, del: client.RemoveByAccess},
 		{Code: "code"}:       {key: "code", get: client.GetByCode, del: client.RemoveByCode},
 		{Refresh: "refresh"}: {key: "refresh", get: client.GetByRefresh, del: client.RemoveByRefresh},
