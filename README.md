@@ -22,14 +22,17 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-	client := client(ctx)
-	defer client.Close()
+	cli := client(context.Background())
+	defer cli.Close()
+
+	// Create a new Firestore TokenStore with "tokens" as a top-level collection name.
+	store := fstore.New(cli, "tokens")
 
 	manager := manage.NewDefaultManager()
-	manager.MapTokenStorage(fstorage.New(client, "tokens"))
+	manager.MapTokenStorage(store)
 }
 
+// As seen here: https://firebase.google.com/docs/firestore/quickstart#initialize
 func client(ctx context.Context) *firestore.Client {
 	conf := &firebase.Config{ProjectID: os.Getenv("PROJECT_ID")}
 	app, err := firebase.NewApp(ctx, conf)
@@ -43,6 +46,7 @@ func client(ctx context.Context) *firestore.Client {
 	return client
 }
 ```
+
 ## License
 
     Copyright (c) 2019 Tadej Slamic
