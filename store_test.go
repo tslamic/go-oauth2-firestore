@@ -65,3 +65,17 @@ func TestStoreClient(t *testing.T) {
 		assert.NotNil(t, err)
 	}
 }
+
+func TestIsNilOrZero(t *testing.T) {
+	tokens := map[oauth2.TokenInfo]bool{
+		nil:                               true,
+		&models.Token{}:                   true,
+		&models.Token{Access: "access"}:   false,
+		&models.Token{Code: "code"}:       false,
+		&models.Token{Refresh: "refresh"}: false,
+	}
+	for tok, expected := range tokens {
+		result := isNilOrZero(tok)
+		assert.Equal(t, expected, result)
+	}
+}

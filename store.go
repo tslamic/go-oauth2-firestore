@@ -2,8 +2,10 @@ package fstore
 
 import (
 	"cloud.google.com/go/firestore"
+	"errors"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
+	"reflect"
 	"time"
 )
 
@@ -34,7 +36,11 @@ type client struct {
 }
 
 func (f *client) Create(info oauth2.TokenInfo) error {
-	return f.c.Put(token(info))
+	t, err := token(info)
+	if err != nil {
+		return err
+	}
+	return f.c.Put(t)
 }
 
 func (f *client) RemoveByCode(code string) error {
@@ -61,7 +67,12 @@ func (f *client) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
 	return f.c.Get(keyRefresh, refresh)
 }
 
-func token(info oauth2.TokenInfo) *models.Token {
+var ErrInvalidToken = errors.New("invalid token")
+
+func token(info oauth2.TokenInfo) (*models.Token, error) {
+	if isNilOrZero(info) {
+		return nil, ErrInvalidToken
+	}
 	return &models.Token{
 		ClientID:         info.GetClientID(),
 		UserID:           info.GetUserID(),
@@ -76,5 +87,15 @@ func token(info oauth2.TokenInfo) *models.Token {
 		Refresh:          info.GetRefresh(),
 		RefreshCreateAt:  info.GetRefreshCreateAt(),
 		RefreshExpiresIn: info.GetRefreshExpiresIn(),
+	}, nil
+}
+
+func isNilOrZero(info oauth2.TokenInfo) bool {
+	if info == nil {
+		return true
 	}
+	if v := reflect.ValueOf(info); v.IsNil() {
+		return true
+	}
+	return reflect.DeepEqual(info, info.New())
 }
