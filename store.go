@@ -67,11 +67,12 @@ func (f *client) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
 	return f.c.Get(keyRefresh, refresh)
 }
 
-var ErrInvalidToken = errors.New("invalid token")
+// ErrInvalidTokenInfo is returned whenever TokenInfo is either nil or zero/empty.
+var ErrInvalidTokenInfo = errors.New("invalid TokenInfo")
 
 func token(info oauth2.TokenInfo) (*models.Token, error) {
 	if isNilOrZero(info) {
-		return nil, ErrInvalidToken
+		return nil, ErrInvalidTokenInfo
 	}
 	return &models.Token{
 		ClientID:         info.GetClientID(),
