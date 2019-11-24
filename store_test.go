@@ -5,6 +5,7 @@ import (
 	"context"
 	firebase "firebase.google.com/go"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/api/iterator"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
 	"log"
@@ -70,7 +71,7 @@ func TestNoDocument(t *testing.T) {
 	client := New(c, "tests")
 	info, err := client.GetByRefresh("whoops")
 	assert.Nil(t, info)
-	assert.Equal(t, ErrDocumentDoesNotExist, err)
+	assert.Equal(t, iterator.Done, err)
 }
 
 func TestIsNilOrZero(t *testing.T) {
