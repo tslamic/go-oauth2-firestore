@@ -3,6 +3,7 @@ package fstore
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"errors"
 	"gopkg.in/oauth2.v3/models"
 	"sync"
 	"time"
@@ -30,7 +31,7 @@ func (s *store) Get(key string, val interface{}) (*models.Token, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.t)
 	defer cancel()
 	iter := s.c.Collection(s.n).Where(key, "==", val).Limit(1).Documents(ctx)
-	doc, err := iter.Next()
+	doc, err := first(iter)
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +48,24 @@ func (s *store) Del(key string, val interface{}) error {
 	return s.c.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		query := s.c.Collection(s.n).Where(key, "==", val).Limit(1)
 		iter := tx.Documents(query)
-		doc, err := iter.Next()
+		doc, err := first(iter)
 		if err != nil {
 			return err
 		}
 		return tx.Delete(doc.Ref)
 	})
+}
+
+// ErrDocumentDoesNotExist is returned whenever a Firestore document does not exist.
+var ErrDocumentDoesNotExist = errors.New("document does not exist")
+
+func first(iter *firestore.DocumentIterator) (*firestore.DocumentSnapshot, error) {
+	doc, err := iter.Next()
+	if err != nil {
+		return nil, err
+	}
+	if !doc.Exists() {
+		return nil, ErrDocumentDoesNotExist
+	}
+	return doc, nil
 }

@@ -66,6 +66,13 @@ func TestStoreClient(t *testing.T) {
 	}
 }
 
+func TestNoDocument(t *testing.T) {
+	client := New(c, "tests")
+	info, err := client.GetByRefresh("whoops")
+	assert.Nil(t, info)
+	assert.Equal(t, ErrDocumentDoesNotExist, err)
+}
+
 func TestIsNilOrZero(t *testing.T) {
 	tokens := map[oauth2.TokenInfo]bool{
 		nil:                               true,
