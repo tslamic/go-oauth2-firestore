@@ -6,16 +6,20 @@ import (
 	"errors"
 	"google.golang.org/api/iterator"
 	"gopkg.in/oauth2.v3/models"
+	"sync"
 	"time"
 )
 
 type store struct {
+	s sync.Mutex
 	c *firestore.Client
 	n string // Top-level collection name.
 	t time.Duration
 }
 
 func (s *store) Put(token *models.Token) error {
+	s.s.Lock()
+	defer s.s.Unlock()
 	ctx, cancel := context.WithTimeout(context.Background(), s.t)
 	defer cancel()
 	_, _, err := s.c.Collection(s.n).Add(ctx, token)
@@ -23,6 +27,8 @@ func (s *store) Put(token *models.Token) error {
 }
 
 func (s *store) Get(key string, val interface{}) (*models.Token, error) {
+	s.s.Lock()
+	defer s.s.Unlock()
 	ctx, cancel := context.WithTimeout(context.Background(), s.t)
 	defer cancel()
 	iter := s.c.Collection(s.n).Where(key, "==", val).Limit(1).Documents(ctx)
@@ -36,6 +42,8 @@ func (s *store) Get(key string, val interface{}) (*models.Token, error) {
 }
 
 func (s *store) Del(key string, val interface{}) error {
+	s.s.Lock()
+	defer s.s.Unlock()
 	ctx, cancel := context.WithTimeout(context.Background(), s.t)
 	defer cancel()
 	return s.c.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
