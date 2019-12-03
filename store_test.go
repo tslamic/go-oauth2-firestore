@@ -63,7 +63,7 @@ func TestStoreClient(t *testing.T) {
 		assert.NotNil(t, err)
 
 		err = h.del(h.key)
-		assert.NotNil(t, err)
+		assert.Nil(t, err)
 	}
 }
 
