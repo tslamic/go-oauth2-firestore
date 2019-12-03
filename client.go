@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"errors"
+	"google.golang.org/api/iterator"
 	"gopkg.in/oauth2.v3/models"
 	"time"
 )
@@ -42,6 +43,9 @@ func (s *store) Del(key string, val interface{}) error {
 		iter := tx.Documents(query)
 		doc, err := first(iter)
 		if err != nil {
+			if err == iterator.Done || err == ErrDocumentDoesNotExist {
+				return nil // Document does not exist - we're done!
+			}
 			return err
 		}
 		return tx.Delete(doc.Ref)
