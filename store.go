@@ -1,32 +1,35 @@
 package fstore
 
 import (
-	"cloud.google.com/go/firestore"
+	"context"
 	"errors"
-	"gopkg.in/oauth2.v3"
-	"gopkg.in/oauth2.v3/models"
 	"reflect"
 	"time"
+
+	"cloud.google.com/go/firestore"
+	"github.com/go-oauth2/oauth2/v4"
+	"github.com/go-oauth2/oauth2/v4/models"
 )
 
 const (
-	keyCode    = "Code"
-	keyAccess  = "Access"
-	keyRefresh = "Refresh"
+	keyCode     = "Code"
+	keyAccess   = "Access"
+	keyRefresh  = "Refresh"
+	KeyClientID = "ID"
 
 	timeout = 30 * time.Second
 )
 
-// New returns a new Firestore token store.
+// NewTokenStorage returns a new Firestore token store.
 // The provided firestore client will never be closed.
-func New(c *firestore.Client, collection string) oauth2.TokenStore {
-	return NewWithTimeout(c, collection, timeout)
+func NewTokenStorage(c *firestore.Client, collection string) oauth2.TokenStore {
+	fs := &store{c: c, n: collection, t: timeout}
+	return &client{c: fs}
 }
 
-// NewWithTimeout returns a new Firestore token store.
-// The provided firestore client will never be closed and all Firestore operations will be cancelled
-// if they surpass the provided timeout.
-func NewWithTimeout(c *firestore.Client, collection string, timeout time.Duration) oauth2.TokenStore {
+// NewClientStorage returns a new Firestore token store.
+// The provided firestore client will never be closed.
+func NewClientStorage(c *firestore.Client, collection string) oauth2.ClientStore {
 	fs := &store{c: c, n: collection, t: timeout}
 	return &client{c: fs}
 }
@@ -35,36 +38,40 @@ type client struct {
 	c *store
 }
 
-func (f *client) Create(info oauth2.TokenInfo) error {
+func (f *client) Create(ctx context.Context, info oauth2.TokenInfo) error {
 	t, err := token(info)
 	if err != nil {
 		return err
 	}
-	return f.c.Put(t)
+	return f.c.Put(ctx, t)
 }
 
-func (f *client) RemoveByCode(code string) error {
-	return f.c.Del(keyCode, code)
+func (f *client) RemoveByCode(ctx context.Context, code string) error {
+	return f.c.Del(ctx, keyCode, code)
 }
 
-func (f *client) RemoveByAccess(access string) error {
-	return f.c.Del(keyAccess, access)
+func (f *client) RemoveByAccess(ctx context.Context, access string) error {
+	return f.c.Del(ctx, keyAccess, access)
 }
 
-func (f *client) RemoveByRefresh(refresh string) error {
-	return f.c.Del(keyRefresh, refresh)
+func (f *client) RemoveByRefresh(ctx context.Context, refresh string) error {
+	return f.c.Del(ctx, keyRefresh, refresh)
 }
 
-func (f *client) GetByCode(code string) (oauth2.TokenInfo, error) {
-	return f.c.Get(keyCode, code)
+func (f *client) GetByCode(ctx context.Context, code string) (oauth2.TokenInfo, error) {
+	return f.c.Get(ctx, keyCode, code)
 }
 
-func (f *client) GetByAccess(access string) (oauth2.TokenInfo, error) {
-	return f.c.Get(keyAccess, access)
+func (f *client) GetByAccess(ctx context.Context, access string) (oauth2.TokenInfo, error) {
+	return f.c.Get(ctx, keyAccess, access)
 }
 
-func (f *client) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
-	return f.c.Get(keyRefresh, refresh)
+func (f *client) GetByRefresh(ctx context.Context, refresh string) (oauth2.TokenInfo, error) {
+	return f.c.Get(ctx, keyRefresh, refresh)
+}
+
+func (f *client) GetByID(ctx context.Context, id string) (oauth2.ClientInfo, error) {
+	return f.c.GetClient(ctx, KeyClientID, id)
 }
 
 // ErrInvalidTokenInfo is returned whenever TokenInfo is either nil or zero/empty.
