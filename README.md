@@ -26,10 +26,12 @@ func main() {
 	defer cli.Close()
 
 	// Create a new Firestore TokenStore with "tokens" as a top-level collection name.
-	store := fstore.New(cli, "tokens")
+	tokenStore := fstore.New(cli, "tokens")
+	clientStore := fstore.New(cli, "clients")
 
 	manager := manage.NewDefaultManager()
-	manager.MapTokenStorage(store)
+	manager.MapTokenStorage(tokenStore)
+	manager.MapClientStorage(clientStore)
 }
 
 // As seen here: https://firebase.google.com/docs/firestore/quickstart#initialize
